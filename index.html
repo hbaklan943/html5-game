@@ -1,14 +1,18 @@
+<!--index.html-->
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
-    <style></style>
-    <script src="https://pixijs.download/release/pixi.js"></script>
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-eval'"
+    />
+    <title>Hello World!</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script defer src="./assets/pixi.js"></script>
+    <script defer src="./renderer.js"></script>
   </head>
-  <body>
-    <script type="module" src="/main.js"></script>
-  </body>
+  <body></body>
 </html>
