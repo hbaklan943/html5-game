@@ -8,21 +8,39 @@ let downPressed = false;
 let spacePressed = false;
 let spaceHolding = false;
 function keyDownHandler(event) {
-  spacePressed = event.keyCode === KeyboardHelper.space;
-  rightPressed = event.keyCode === KeyboardHelper.right;
-  leftPressed = event.keyCode === KeyboardHelper.left;
-  upPressed = event.keyCode === KeyboardHelper.up;
-  downPressed = event.keyCode === KeyboardHelper.down;
+  if (event.keyCode === KeyboardHelper.space) {
+    spacePressed = true;
+  }
+  if (event.keyCode === KeyboardHelper.right) {
+    rightPressed = true;
+  }
+  if (event.keyCode === KeyboardHelper.left) {
+    leftPressed = true;
+  }
+  if (event.keyCode === KeyboardHelper.up) {
+    upPressed = true;
+  }
+  if (event.keyCode === KeyboardHelper.down) {
+    downPressed = true;
+  }
 }
 function keyUpHandler(event) {
   if (event.keyCode === KeyboardHelper.space) {
     spacePressed = false;
     spaceHolding = false;
   }
-  rightPressed = !event.keyCode === KeyboardHelper.right;
-  leftPressed = !event.keyCode === KeyboardHelper.left;
-  upPressed = !event.keyCode === KeyboardHelper.up;
-  downPressed = !event.keyCode === KeyboardHelper.down;
+  if (event.keyCode === KeyboardHelper.right) {
+    rightPressed = false;
+  }
+  if (event.keyCode === KeyboardHelper.left) {
+    leftPressed = false;
+  }
+  if (event.keyCode === KeyboardHelper.up) {
+    upPressed = false;
+  }
+  if (event.keyCode === KeyboardHelper.down) {
+    downPressed = false;
+  }
 }
 
 let app = new PIXI.Application({ width: 1920, height: 1080 });
