@@ -64,13 +64,13 @@ groundBody.createFixture(groundBox, 0.0);
 let characterBody = world.createBody({
   type: "dynamic",
   fixedRotation: true,
-  position: planck.Vec2(9.9, 25.0),
+  position: planck.Vec2(9.9, 15.0),
 });
 let dynamicBox = planck.Box(0.5, 0.5);
 let fixtureDef = {
   shape: dynamicBox,
   density: 1.0,
-  friction: 0.2,
+  friction: 1,
 };
 characterBody.createFixture(fixtureDef);
 
@@ -83,17 +83,18 @@ function gameLoop(delta) {
   // Step the physics simulation
   stats.begin();
   world.step(timeStep * delta, velocityIterations, positionIterations);
-  if (rightPressed) {
+  console.log(characterBody.getLinearVelocity());
+  if (rightPressed && characterBody.getLinearVelocity().x < 5) {
     console.log("pressing right");
     characterBody.applyForce(planck.Vec2(20, 0), planck.Vec2(0, 0));
   }
-  if (leftPressed) {
-    console.log("pressing right");
+  if (leftPressed && characterBody.getLinearVelocity().x > -5) {
+    //console.log("pressing right");
     characterBody.applyForce(planck.Vec2(-20, 0), planck.Vec2(0, 0));
   }
   if (spacePressed && !spaceHolding) {
     characterBody.applyLinearImpulse(planck.Vec2(0, 7), planck.Vec2(0, 0));
-    console.log("allied impulse");
+    //console.log("applied impulse");
     spaceHolding = true;
   }
 
@@ -118,7 +119,6 @@ function gameLoop(delta) {
   characterSprite.position.set(pixiCharacterPos.x, pixiCharacterPos.y);
   characterSprite.rotation = characterAngle;
   groundSprite.position.set(groundPos.x, groundPos.y);
-  // You can add other game logic or updates here if needed
 
   // Render the PIXI.js stage
   app.render();
