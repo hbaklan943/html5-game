@@ -1,21 +1,28 @@
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
-const KeyboardHelper = { left: 37, up: 38, right: 39, down: 40 };
+const KeyboardHelper = { left: 37, up: 38, right: 39, down: 40, space: 32 };
 let rightPressed = false;
 let leftPressed = false;
 let upPressed = false;
 let downPressed = false;
+let spacePressed = false;
+let spaceHolding = false;
 function keyDownHandler(event) {
+  spacePressed = event.keyCode === KeyboardHelper.space;
   rightPressed = event.keyCode === KeyboardHelper.right;
   leftPressed = event.keyCode === KeyboardHelper.left;
   upPressed = event.keyCode === KeyboardHelper.up;
   downPressed = event.keyCode === KeyboardHelper.down;
 }
 function keyUpHandler(event) {
-  rightPressed = event.keyCode !== KeyboardHelper.right;
-  leftPressed = event.keyCode !== KeyboardHelper.left;
-  upPressed = event.keyCode !== KeyboardHelper.up;
-  downPressed = event.keyCode !== KeyboardHelper.down;
+  if (event.keyCode === KeyboardHelper.space) {
+    spacePressed = false;
+    spaceHolding = false;
+  }
+  rightPressed = !event.keyCode === KeyboardHelper.right;
+  leftPressed = !event.keyCode === KeyboardHelper.left;
+  upPressed = !event.keyCode === KeyboardHelper.up;
+  downPressed = !event.keyCode === KeyboardHelper.down;
 }
 
 let app = new PIXI.Application({ width: 1920, height: 1080 });
@@ -45,7 +52,7 @@ let dynamicBox = planck.Box(0.5, 0.5);
 let fixtureDef = {
   shape: dynamicBox,
   density: 1.0,
-  friction: 0.3,
+  friction: 1.0,
 };
 characterBody.createFixture(fixtureDef);
 
@@ -59,7 +66,16 @@ function gameLoop(delta) {
   world.step(timeStep * delta, velocityIterations, positionIterations);
   if (rightPressed) {
     console.log("pressing right");
-    characterBody.app;
+    characterBody.applyForce(planck.Vec2(10, 0), planck.Vec2(0, 0));
+  }
+  if (leftPressed) {
+    console.log("pressing right");
+    characterBody.applyForce(planck.Vec2(-10, 0), planck.Vec2(0, 0));
+  }
+  if (spacePressed && !spaceHolding) {
+    characterBody.applyLinearImpulse(planck.Vec2(0, 5), planck.Vec2(0, 0));
+    console.log("allied impulse");
+    spaceHolding = true;
   }
 
   // Update the sprite position based on the physics body position
