@@ -3625,13 +3625,12 @@ Deprecated since v${version}`
           value);
     }
   };
-  (_Color.shared = new _Color())
-  /**
-   * Temporary Color object for static uses internally.
-   * As to not conflict with Color.shared.
-   * @ignore
-   */,
-    (_Color.temp = new _Color()) /** Pattern for hex strings */,
+  (_Color.shared = new _Color()),
+    /**
+     * Temporary Color object for static uses internally.
+     * As to not conflict with Color.shared.
+     * @ignore
+     */ (_Color.temp = new _Color()) /** Pattern for hex strings */,
     (_Color.HEX_PATTERN = /^(#|0x)?(([a-f0-9]{3}){1,2}([a-f0-9]{2})?)$/i);
   let Color = _Color;
   function hex2rgb(hex, out = []) {
@@ -7766,9 +7765,11 @@ ${this.fragmentSrc}`),
      * @type {PIXI.PRECISION}
      * @default PIXI.PRECISION.MEDIUM
      */
-    (_Program.defaultFragmentPrecision = isMobile.apple.device
-      ? PRECISION.HIGH
-      : PRECISION.MEDIUM);
+    (
+      _Program.defaultFragmentPrecision = isMobile.apple.device
+        ? PRECISION.HIGH
+        : PRECISION.MEDIUM
+    );
   let Program = _Program,
     UID$1 = 0;
   class UniformGroup {
@@ -8442,7 +8443,7 @@ void main(void){
     (_BatchRenderer.extension = {
       name: "batch",
       type: ExtensionType.RendererPlugin,
-    })
+    }),
     /**
      * Pool of `BatchDrawCall` objects that `flush` used
      * to create "batches" of the objects being rendered.
@@ -8450,8 +8451,7 @@ void main(void){
      * These are never re-allocated again.
      * Shared between all batch renderers because it can be only one "flush" working at the moment.
      * @member {PIXI.BatchDrawCall[]}
-     */,
-    (_BatchRenderer._drawCallPool = [])
+     */ (_BatchRenderer._drawCallPool = []),
     /**
      * Pool of `BatchDrawCall` objects that `flush` used
      * to create "batches" of the objects being rendered.
@@ -8459,8 +8459,7 @@ void main(void){
      * These are never re-allocated again.
      * Shared between all batch renderers because it can be only one "flush" working at the moment.
      * @member {PIXI.BatchTextureArray[]}
-     */,
-    (_BatchRenderer._textureArrayPool = []);
+     */ (_BatchRenderer._textureArrayPool = []);
   let BatchRenderer = _BatchRenderer;
   extensions$1.add(BatchRenderer);
   var defaultFragment = `varying vec2 vTextureCoord;
@@ -13503,21 +13502,19 @@ void main(void)
       this.renderer = null;
     }
   };
-  (_TextureGCSystem.defaultMode = GC_MODES.AUTO)
-  /**
-   * Default maximum idle frames before a texture is destroyed by garbage collection.
-   * @static
-   * @default 3600
-   * @see PIXI.TextureGCSystem#maxIdle
-   */,
-    (_TextureGCSystem.defaultMaxIdle = 3600)
+  (_TextureGCSystem.defaultMode = GC_MODES.AUTO),
+    /**
+     * Default maximum idle frames before a texture is destroyed by garbage collection.
+     * @static
+     * @default 3600
+     * @see PIXI.TextureGCSystem#maxIdle
+     */ (_TextureGCSystem.defaultMaxIdle = 3600),
     /**
      * Default frames between two garbage collections.
      * @static
      * @default 600
      * @see PIXI.TextureGCSystem#checkCountMax
-     */,
-    (_TextureGCSystem.defaultCheckCountMax = 600) /** @ignore */,
+     */ (_TextureGCSystem.defaultCheckCountMax = 600) /** @ignore */,
     (_TextureGCSystem.extension = {
       type: ExtensionType.RendererSystem,
       name: "textureGC",
@@ -15610,19 +15607,17 @@ void main(void)
   (_Renderer.extension = {
     type: ExtensionType.Renderer,
     priority: 1,
-  })
-  /**
-   * Collection of installed plugins. These are included by default in PIXI, but can be excluded
-   * by creating a custom build. Consult the README for more information about creating custom
-   * builds and excluding plugins.
-   * @private
-   */,
-    (_Renderer.__plugins = {})
+  }),
+    /**
+     * Collection of installed plugins. These are included by default in PIXI, but can be excluded
+     * by creating a custom build. Consult the README for more information about creating custom
+     * builds and excluding plugins.
+     * @private
+     */ (_Renderer.__plugins = {}),
     /**
      * The collection of installed systems.
      * @private
-     */,
-    (_Renderer.__systems = {});
+     */ (_Renderer.__systems = {});
   let Renderer = _Renderer;
   extensions$1.handleByMap(ExtensionType.RendererPlugin, Renderer.__plugins),
     extensions$1.handleByMap(ExtensionType.RendererSystem, Renderer.__systems),
@@ -16172,13 +16167,12 @@ void main(void)
     }
     // eslint-disable-line max-len
   };
-  (_SVGResource.SVG_XML = /^(<\?xml[^?]+\?>)?\s*(<!--[^(-->)]*-->)?\s*\<svg/m)
-  /**
-   * Regular expression for SVG size.
-   * @example &lt;svg width="100" height="100"&gt;&lt;/svg&gt;
-   * @readonly
-   */,
-    (_SVGResource.SVG_SIZE =
+  (_SVGResource.SVG_XML = /^(<\?xml[^?]+\?>)?\s*(<!--[^(-->)]*-->)?\s*\<svg/m),
+    /**
+     * Regular expression for SVG size.
+     * @example &lt;svg width="100" height="100"&gt;&lt;/svg&gt;
+     * @readonly
+     */ (_SVGResource.SVG_SIZE =
       /<svg[^>]*(?:\s(width|height)=('|")(\d*(?:\.\d+)?)(?:px)?('|"))[^>]*(?:\s(width|height)=('|")(\d*(?:\.\d+)?)(?:px)?('|"))[^>]*>/i);
   let SVGResource = _SVGResource;
   const _VideoResource = class _VideoResource2 extends BaseImageResource {
@@ -16443,12 +16437,11 @@ void main(void)
     "h264",
     "avi",
     "mov",
-  ])
-  /**
-   * Map of video MIME types that can't be directly derived from file extensions.
-   * @readonly
-   */,
-    (_VideoResource.MIME_TYPES = {
+  ]),
+    /**
+     * Map of video MIME types that can't be directly derived from file extensions.
+     * @readonly
+     */ (_VideoResource.MIME_TYPES = {
       ogv: "video/ogg",
       mov: "video/quicktime",
       m4v: "video/mp4",
@@ -21749,14 +21742,13 @@ void main()
   (_EventSystem.extension = {
     name: "events",
     type: [ExtensionType.RendererSystem, ExtensionType.CanvasRendererSystem],
-  })
-  /**
-   * The event features that are enabled by the EventSystem
-   * This option only is available when using **@pixi/events** package
-   * (included in the **pixi.js** and **pixi.js-legacy** bundle), otherwise it will be ignored.
-   * @since 7.2.0
-   */,
-    (_EventSystem.defaultEventFeatures = {
+  }),
+    /**
+     * The event features that are enabled by the EventSystem
+     * This option only is available when using **@pixi/events** package
+     * (included in the **pixi.js** and **pixi.js-legacy** bundle), otherwise it will be ignored.
+     * @since 7.2.0
+     */ (_EventSystem.defaultEventFeatures = {
       move: !0,
       globalMove: !0,
       click: !0,
@@ -28534,12 +28526,11 @@ Please use Assets.add({ alias, src, data, format, loadParser }) instead.`
           super.destroy(options);
       }
     };
-  (_Graphics.curves = curves)
-  /**
-   * Temporary point to use for containsPoint.
-   * @private
-   */,
-    (_Graphics._TEMP_POINT = new Point());
+  (_Graphics.curves = curves),
+    /**
+     * Temporary point to use for containsPoint.
+     * @private
+     */ (_Graphics._TEMP_POINT = new Point());
   let Graphics = _Graphics;
   const graphicsUtils = {
     buildPoly,
@@ -30587,7 +30578,7 @@ void main(void){
     (_TextMetrics.BASELINE_SYMBOL =
       "M") /** Baseline multiplier for calculate font metrics. */,
     (_TextMetrics.BASELINE_MULTIPLIER = 1.4) /** Height multiplier for setting height of canvas to calculate font metrics. */,
-    (_TextMetrics.HEIGHT_MULTIPLIER = 2)
+    (_TextMetrics.HEIGHT_MULTIPLIER = 2),
     /**
      * A Unicode "character", or "grapheme cluster", can be composed of multiple Unicode code points,
      * such as letters with diacritical marks (e.g. `'\u0065\u0301'`, letter e with acute)
@@ -30598,21 +30589,19 @@ void main(void){
      * you can use other libraries such as [grapheme-splitter]{@link https://www.npmjs.com/package/grapheme-splitter}
      * or [graphemer]{@link https://www.npmjs.com/package/graphemer} to create a polyfill. Since these libraries can be
      * relatively large in size to handle various Unicode grapheme clusters properly, PixiJS won't use them directly.
-     */,
-    (_TextMetrics.graphemeSegmenter = (() => {
+     */ (_TextMetrics.graphemeSegmenter = (() => {
       if (typeof (Intl == null ? void 0 : Intl.Segmenter) == "function") {
         const segmenter = new Intl.Segmenter();
         return (s2) => [...segmenter.segment(s2)].map((x2) => x2.segment);
       }
       return (s2) => [...s2];
-    })())
+    })()),
     /**
      * New rendering behavior for letter-spacing which uses Chrome's new native API. This will
      * lead to more accurate letter-spacing results because it does not try to manually draw
      * each character. However, this Chrome API is experimental and may not serve all cases yet.
      * @see PIXI.TextMetrics.experimentalLetterSpacingSupported
-     */,
-    (_TextMetrics.experimentalLetterSpacing =
+     */ (_TextMetrics.experimentalLetterSpacing =
       !1) /** Cache of {@see PIXI.TextMetrics.FontMetrics} objects. */,
     (_TextMetrics._fonts = {}) /** Cache of new line chars. */,
     (_TextMetrics._newlines = [
@@ -33468,13 +33457,12 @@ void main(void)
      * This character set is the union of `BitmapFont.ALPHA` and `BitmapFont.NUMERIC`.
      * @type {string[][]}
      */
-    (_BitmapFont.ALPHANUMERIC = [["a", "z"], ["A", "Z"], ["0", "9"], " "])
+    (_BitmapFont.ALPHANUMERIC = [["a", "z"], ["A", "Z"], ["0", "9"], " "]),
     /**
      * This character set consists of all the ASCII table.
      * @member {string[][]}
      * @see http://www.asciitable.com/
-     */,
-    (_BitmapFont.ASCII = [[" ", "~"]])
+     */ (_BitmapFont.ASCII = [[" ", "~"]]),
     /**
      * Collection of default options when using `BitmapFont.from`.
      * @property {number} [resolution=1] -
@@ -33482,8 +33470,7 @@ void main(void)
      * @property {number} [textureHeight=512] -
      * @property {number} [padding=4] -
      * @property {string|string[]|string[][]} chars = PIXI.BitmapFont.ALPHANUMERIC
-     */,
-    (_BitmapFont.defaultOptions = {
+     */ (_BitmapFont.defaultOptions = {
       resolution: 1,
       textureWidth: 512,
       textureHeight: 512,
@@ -34449,12 +34436,11 @@ void main(void)\r
       return super.lineJoin;
     }
   };
-  (_HTMLTextStyle.availableFonts = {})
-  /**
-   * List of default options, these are largely the same as TextStyle,
-   * with the exception of whiteSpace, which is set to 'normal' by default.
-   */,
-    (_HTMLTextStyle.defaultOptions = {
+  (_HTMLTextStyle.availableFonts = {}),
+    /**
+     * List of default options, these are largely the same as TextStyle,
+     * with the exception of whiteSpace, which is set to 'normal' by default.
+     */ (_HTMLTextStyle.defaultOptions = {
       /** Align */
       align: "left",
       /** Break words */
