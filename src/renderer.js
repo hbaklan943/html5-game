@@ -1,3 +1,23 @@
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+const KeyboardHelper = { left: 37, up: 38, right: 39, down: 40 };
+let rightPressed = false;
+let leftPressed = false;
+let upPressed = false;
+let downPressed = false;
+function keyDownHandler(event) {
+  rightPressed = event.keyCode === KeyboardHelper.right;
+  leftPressed = event.keyCode === KeyboardHelper.left;
+  upPressed = event.keyCode === KeyboardHelper.up;
+  downPressed = event.keyCode === KeyboardHelper.down;
+}
+function keyUpHandler(event) {
+  rightPressed = event.keyCode !== KeyboardHelper.right;
+  leftPressed = event.keyCode !== KeyboardHelper.left;
+  upPressed = event.keyCode !== KeyboardHelper.up;
+  downPressed = event.keyCode !== KeyboardHelper.down;
+}
+
 let app = new PIXI.Application({ width: 1920, height: 1080 });
 document.body.appendChild(app.view);
 
@@ -16,7 +36,7 @@ let groundBodyDef = {
 let groundBody = world.createBody(groundBodyDef);
 let groundBox = planck.Box(5.0, 0.5);
 groundBody.createFixture(groundBox, 0.0);
-let body = world.createBody({
+let characterBody = world.createBody({
   type: "dynamic",
   fixedRotation: true,
   position: planck.Vec2(9.9, 15.0),
@@ -27,7 +47,7 @@ let fixtureDef = {
   density: 1.0,
   friction: 0.3,
 };
-body.createFixture(fixtureDef);
+characterBody.createFixture(fixtureDef);
 
 let timeStep = 1 / 60;
 let velocityIterations = 8;
@@ -37,13 +57,17 @@ let positionIterations = 3;
 function gameLoop(delta) {
   // Step the physics simulation
   world.step(timeStep * delta, velocityIterations, positionIterations);
+  if (rightPressed) {
+    console.log("pressing right");
+    characterBody.app;
+  }
 
   // Update the sprite position based on the physics body position
-  let characterPosition = body.getPosition();
-  let characterAngle = body.getAngle();
+  let characterPosition = characterBody.getPosition();
+  let characterAngle = characterBody.getAngle();
   let pixiCharacterPos = plankPositionToPixi(characterPosition);
   let groundPos = plankPositionToPixi(groundBody.getPosition());
-  console.log(
+  /* console.log(
     "ground pos:",
     groundBody.getPosition(),
     "ground location:",
@@ -54,7 +78,7 @@ function gameLoop(delta) {
     characterPosition,
     "character location:",
     pixiCharacterPos
-  );
+  ); */
 
   characterSprite.position.set(pixiCharacterPos.x, pixiCharacterPos.y);
   characterSprite.rotation = characterAngle;
