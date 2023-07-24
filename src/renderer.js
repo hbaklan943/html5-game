@@ -64,7 +64,6 @@ groundBody.createFixture(groundBox, 0.0);
 let characterBody = world.createBody({
   type: "dynamic",
   fixedRotation: true,
-  linearDamping: 1.7,
   position: planck.Vec2(9.9, 25.0),
 });
 let dynamicBox = planck.Box(0.5, 0.5);
@@ -82,6 +81,7 @@ let positionIterations = 3;
 // This function will be called on each frame update (tick)
 function gameLoop(delta) {
   // Step the physics simulation
+  stats.begin();
   world.step(timeStep * delta, velocityIterations, positionIterations);
   if (rightPressed) {
     console.log("pressing right");
@@ -122,6 +122,7 @@ function gameLoop(delta) {
 
   // Render the PIXI.js stage
   app.render();
+  stats.end();
 }
 
 // Register the game loop function with Pixi.js ticker
