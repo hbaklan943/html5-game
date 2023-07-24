@@ -64,13 +64,14 @@ groundBody.createFixture(groundBox, 0.0);
 let characterBody = world.createBody({
   type: "dynamic",
   fixedRotation: true,
-  position: planck.Vec2(9.9, 15.0),
+  linearDamping: 1.7,
+  position: planck.Vec2(9.9, 25.0),
 });
 let dynamicBox = planck.Box(0.5, 0.5);
 let fixtureDef = {
   shape: dynamicBox,
   density: 1.0,
-  friction: 1.0,
+  friction: 0.2,
 };
 characterBody.createFixture(fixtureDef);
 
@@ -84,14 +85,14 @@ function gameLoop(delta) {
   world.step(timeStep * delta, velocityIterations, positionIterations);
   if (rightPressed) {
     console.log("pressing right");
-    characterBody.applyForce(planck.Vec2(10, 0), planck.Vec2(0, 0));
+    characterBody.applyForce(planck.Vec2(20, 0), planck.Vec2(0, 0));
   }
   if (leftPressed) {
     console.log("pressing right");
-    characterBody.applyForce(planck.Vec2(-10, 0), planck.Vec2(0, 0));
+    characterBody.applyForce(planck.Vec2(-20, 0), planck.Vec2(0, 0));
   }
   if (spacePressed && !spaceHolding) {
-    characterBody.applyLinearImpulse(planck.Vec2(0, 5), planck.Vec2(0, 0));
+    characterBody.applyLinearImpulse(planck.Vec2(0, 7), planck.Vec2(0, 0));
     console.log("allied impulse");
     spaceHolding = true;
   }
