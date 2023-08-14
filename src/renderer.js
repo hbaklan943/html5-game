@@ -47,20 +47,28 @@ let app = new PIXI.Application({ width: 1920, height: 1080 });
 document.body.appendChild(app.view);
 
 let characterSprite = PIXI.Sprite.from("./assets/character_64px.png");
-let groundSprite = PIXI.Sprite.from("./assets/ground.png");
+let platform1Sprite = PIXI.Sprite.from("./assets/ground.png");
+let platform2Sprite = PIXI.Sprite.from("./assets/ground.png");
 characterSprite.anchor.set(0.5);
-groundSprite.anchor.set(0.5);
+platform1Sprite.anchor.set(0.5);
+platform2Sprite.anchor.set(0.5);
 app.stage.addChild(characterSprite);
-app.stage.addChild(groundSprite);
+app.stage.addChild(platform1Sprite);
+app.stage.addChild(platform2Sprite);
 
 let gravity = planck.Vec2(0.0, -10.0);
 let world = planck.World({ gravity: gravity });
-let groundBodyDef = {
+let platform1Def = {
   position: planck.Vec2(15.0, 8.0),
 };
-let groundBody = world.createBody(groundBodyDef);
+let platform2Def = {
+  position: planck.Vec2(15.0, 12.0),
+};
+let platform1Body = world.createBody(platform1Def);
+let platform2Body = world.createBody(platform2Def);
 let groundBox = planck.Box(5.0, 0.5);
-groundBody.createFixture(groundBox, 0.0);
+let platform1Fix = platform1Body.createFixture(groundBox, 0.0);
+let platform2Fix = platform2Body.createFixture(groundBox, 0.0);
 let characterBody = world.createBody({
   type: "dynamic",
   fixedRotation: true,
@@ -70,9 +78,9 @@ let dynamicBox = planck.Box(0.5, 0.5);
 let fixtureDef = {
   shape: dynamicBox,
   density: 1.0,
-  friction: 1,
+  friction: 0.6,
 };
-characterBody.createFixture(fixtureDef);
+let characterFix = characterBody.createFixture(fixtureDef);
 
 let timeStep = 1 / 60;
 let velocityIterations = 8;
@@ -82,15 +90,42 @@ let positionIterations = 3;
 function gameLoop(delta) {
   // Step the physics simulation
   stats.begin();
+
+  world.on("pre-solve", function (contact, oldManifold) {
+    let fixA = contact.getFixtureA();
+    let fixB = contact.getFixtureB();
+
+    let isCharPlatformContact;
+    let contactingPlatform;
+    if (fixA.m_body.m_type == "static") {
+      isCharPlatformContact = true;
+      contactingPlatform = fixA;
+    }
+    if (fixB.m_body.m_type == "static") {
+      isCharPlatformContact = true;
+      contactingPlatform = fixB;
+    }
+    if (!isCharPlatformContact) {
+      return;
+    }
+
+    let p = characterBody.getPosition();
+
+    if (p.y < contactingPlatform.m_body.c_position.c.y + 1) {
+      contact.setEnabled(false);
+    } else if (downPressed) {
+      contact.setEnabled(false);
+    }
+  });
+
   world.step(timeStep * delta, velocityIterations, positionIterations);
-  console.log(characterBody.getLinearVelocity());
+  //console.log(characterBody.getLinearVelocity());
   if (rightPressed && characterBody.getLinearVelocity().x < 5) {
-    console.log("pressing right");
-    characterBody.applyForce(planck.Vec2(20, 0), planck.Vec2(0, 0));
+    characterBody.applyForce(planck.Vec2(70, 0), planck.Vec2(0, 0));
   }
   if (leftPressed && characterBody.getLinearVelocity().x > -5) {
     //console.log("pressing right");
-    characterBody.applyForce(planck.Vec2(-20, 0), planck.Vec2(0, 0));
+    characterBody.applyForce(planck.Vec2(-70, 0), planck.Vec2(0, 0));
   }
   if (spacePressed && !spaceHolding) {
     characterBody.applyLinearImpulse(planck.Vec2(0, 7), planck.Vec2(0, 0));
@@ -102,7 +137,8 @@ function gameLoop(delta) {
   let characterPosition = characterBody.getPosition();
   let characterAngle = characterBody.getAngle();
   let pixiCharacterPos = plankPositionToPixi(characterPosition);
-  let groundPos = plankPositionToPixi(groundBody.getPosition());
+  let platform1Pos = plankPositionToPixi(platform1Body.getPosition());
+  let platform2Pos = plankPositionToPixi(platform2Body.getPosition());
   /* console.log(
     "ground pos:",
     groundBody.getPosition(),
@@ -118,7 +154,8 @@ function gameLoop(delta) {
 
   characterSprite.position.set(pixiCharacterPos.x, pixiCharacterPos.y);
   characterSprite.rotation = characterAngle;
-  groundSprite.position.set(groundPos.x, groundPos.y);
+  platform1Sprite.position.set(platform1Pos.x, platform1Pos.y);
+  platform2Sprite.position.set(platform2Pos.x, platform2Pos.y);
 
   // Render the PIXI.js stage
   app.render();
