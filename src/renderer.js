@@ -95,6 +95,7 @@ let character1Sprite = PIXI.Sprite.from("./assets/red_character.png");
 let character2Sprite = PIXI.Sprite.from("./assets/blue_character.png");
 let platform1Sprite = PIXI.Sprite.from("./assets/ground.png");
 let platform2Sprite = PIXI.Sprite.from("./assets/ground.png");
+let bulletTexture = PIXI.Texture.from("./assets/bullet.png");
 character1Sprite.anchor.set(0.5);
 character2Sprite.anchor.set(0.5);
 platform1Sprite.anchor.set(0.5);
@@ -129,7 +130,7 @@ let character1Body = world.createBody({
   position: planck.Vec2(11, 15.0),
   userData: {
     id: 1,
-    direction: "right",
+    direction: true,
   },
 });
 let character2Body = world.createBody({
@@ -138,7 +139,7 @@ let character2Body = world.createBody({
   position: planck.Vec2(19, 15.0),
   userData: {
     id: 2,
-    direction: "right",
+    direction: true,
   },
 });
 let dynamicBox = planck.Box(0.5, 0.5);
@@ -149,6 +150,8 @@ let fixtureDef = {
 };
 let character1Fix = character1Body.createFixture(fixtureDef);
 let character2Fix = character2Body.createFixture(fixtureDef);
+let bulletBodies = [];
+let bulletSprites = [];
 
 let timeStep = 1 / 60;
 let velocityIterations = 8;
@@ -198,19 +201,25 @@ function gameLoop(delta) {
 
   world.step(timeStep * delta, velocityIterations, positionIterations);
   //console.log(character1Body.getLinearVelocity());
+
+  let character1UserData = character1Body.getUserData();
+  let character2UserData = character2Body.getUserData();
   if (rightPressed && character1Body.getLinearVelocity().x < 5) {
     character1Body.applyForce(planck.Vec2(70, 0), planck.Vec2(0, 0));
+    character1Body.setUserData({ ...character1UserData, direction: true });
   }
   if (dPressed && character2Body.getLinearVelocity().x < 5) {
     character2Body.applyForce(planck.Vec2(70, 0), planck.Vec2(0, 0));
+    character2Body.setUserData({ ...character2UserData, direction: true });
   }
   if (leftPressed && character1Body.getLinearVelocity().x > -5) {
-    //console.log("pressing right");
     character1Body.applyForce(planck.Vec2(-70, 0), planck.Vec2(0, 0));
+    character1Body.setUserData({ ...character1UserData, direction: false });
   }
   if (aPressed && character2Body.getLinearVelocity().x > -5) {
     //console.log("pressing right");
     character2Body.applyForce(planck.Vec2(-70, 0), planck.Vec2(0, 0));
+    character2Body.setUserData({ ...character2UserData, direction: false });
   }
   if (upPressed && !upHolding) {
     let vel = character1Body.getLinearVelocity();
@@ -225,6 +234,20 @@ function gameLoop(delta) {
     character2Body.setLinearVelocity(vel);
     //console.log("applied impulse");
     wHolding = true;
+  }
+  if (spacePressed && !spaceHolding) {
+    let bulletBody = world.createBody({
+      position: character2Body.getPosition(),
+      type: "bullet",
+    });
+    bulletBody.createFixture(planck.Box(0.18, 0.046));
+    bulletBody.setLinearVelocity(planck.Vec2(25, 0));
+    bulletBodies.push(bulletBody);
+    let bulletSprite = new PIXI.Sprite(bulletTexture);
+    bulletSprite.anchor.set(0.5);
+    app.stage.addChild(bulletSprite);
+    bulletSprites.push(bulletSprite);
+    spaceHolding = true;
   }
 
   // Update the sprite position based on the physics body position
@@ -251,6 +274,19 @@ function gameLoop(delta) {
   character2Sprite.position.set(pixiCharacter2Pos.x, pixiCharacter2Pos.y);
   platform1Sprite.position.set(platform1Pos.x, platform1Pos.y);
   platform2Sprite.position.set(platform2Pos.x, platform2Pos.y);
+  console.log(bulletSprites, bulletBodies);
+  bulletSprites.forEach((sprite, i) => {
+    const pos = plankPositionToPixi(bulletBodies[i].getPosition());
+    //console.log(i, pos);
+    sprite.position.set(pos.x, pos.y);
+  });
+  bulletSprites.forEach((sprite, i) => {
+    const pos = plankPositionToPixi(bulletBodies[i].getPosition());
+    if (pos.x < 0 || pos.x > 1920) {
+      bulletBodies = bulletBodies.splice(i, 1);
+      bulletSprites = bulletSprites.splice(i, 1);
+    }
+  });
 
   // Render the PIXI.js stage
   app.render();
