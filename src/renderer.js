@@ -27,7 +27,7 @@ let sPressed = false;
 let pPressed = false;
 let pHolding = false;
 function keyDownHandler(event) {
-  console.log(world.getBodyList());
+  //console.log(world.getBodyList());
   if (event.keyCode === KeyboardHelper.space) {
     spacePressed = true;
   }
@@ -162,6 +162,7 @@ let character1Fix = character1Body.createFixture(fixtureDef);
 let character2Fix = character2Body.createFixture(fixtureDef);
 let bulletBodies = [];
 let bulletSprites = [];
+let destroyedBodies = [];
 
 let timeStep = 1 / 60;
 let velocityIterations = 8;
@@ -198,8 +199,11 @@ world.on("pre-solve", function (contact, oldManifold) {
     isCharBulletContact = true;
     let vel = fixB.getBody().getLinearVelocity();
     vel.x =
-      vel.x + fixA.getBody().getLinearVelocity().x > 0 ? vel.x + 5 : vel.x - 5;
+      vel.x + fixA.getBody().getLinearVelocity().x > 0
+        ? vel.x + 10
+        : vel.x - 10;
     fixB.getBody().setLinearVelocity(vel);
+    destroyedBodies.push(fixB.getBody());
   } else if (fixB.getBody().getType() == "bullet") {
     if (
       fixB.getBody().getUserData().shooterId ===
@@ -210,11 +214,9 @@ world.on("pre-solve", function (contact, oldManifold) {
     }
     isCharBulletContact = true;
     let vel = fixA.getBody().getLinearVelocity();
-    vel.x = fixB.getBody().getLinearVelocity().x > 0 ? vel.x + 5 : vel.x - 5;
+    vel.x = fixB.getBody().getLinearVelocity().x > 0 ? vel.x + 10 : vel.x - 10;
     fixA.getBody().setLinearVelocity(vel);
-    //console.log(world.getBodyCount());
-    world.destroyBody(fixB.getBody());
-    //console.log(world.getBodyCount());
+    destroyedBodies.push(fixB.getBody());
   }
   if (!isCharPlatformContact) {
     contact.setEnabled(false);
@@ -248,6 +250,16 @@ function gameLoop(delta) {
 
   world.step(timeStep * delta, velocityIterations, positionIterations);
   //console.log(character1Body.getLinearVelocity());
+  if (destroyedBodies.length !== 0) {
+    destroyedBodies.forEach((body) => {
+      world.destroyBody(body);
+      const idxOfBody = bulletBodies.indexOf(body);
+      bulletBodies.splice(idxOfBody, 1);
+      app.stage.removeChild(bulletSprites[bulletSprites.length - 1]);
+      bulletSprites.pop();
+    });
+    destroyedBodies.length = 0;
+  }
 
   let character1UserData = character1Body.getUserData();
   let character2UserData = character2Body.getUserData();
@@ -291,9 +303,9 @@ function gameLoop(delta) {
         shooterId: 1,
       },
     });
-    bulletBody.createFixture(planck.Box(0.18, 0.046));
+    bulletBody.createFixture(planck.Box(0.36, 0.092));
     bulletBody.setLinearVelocity(
-      planck.Vec2(character1UserData.direction ? 25 : -25, 0)
+      planck.Vec2(character1UserData.direction ? 15 : -15, 0)
     );
     bulletBodies.push(bulletBody);
     let bulletSprite = new PIXI.Sprite(bulletTexture);
@@ -311,9 +323,9 @@ function gameLoop(delta) {
         shooterId: 2,
       },
     });
-    bulletBody.createFixture(planck.Box(0.18, 0.046));
+    bulletBody.createFixture(planck.Box(0.36, 0.092));
     bulletBody.setLinearVelocity(
-      planck.Vec2(character2UserData.direction ? 25 : -25, 0)
+      planck.Vec2(character2UserData.direction ? 15 : -15, 0)
     );
     bulletBodies.push(bulletBody);
     let bulletSprite = new PIXI.Sprite(bulletTexture);
@@ -348,17 +360,17 @@ function gameLoop(delta) {
   character2Sprite.position.set(pixiCharacter2Pos.x, pixiCharacter2Pos.y);
   platform1Sprite.position.set(platform1Pos.x, platform1Pos.y);
   platform2Sprite.position.set(platform2Pos.x, platform2Pos.y);
-  //console.log(bulletSprites, bulletBodies);
-  bulletSprites.forEach((sprite, i) => {
-    const pos = plankPositionToPixi(bulletBodies[i].getPosition());
-    sprite.position.set(pos.x, pos.y);
+  console.log(bulletSprites, bulletBodies);
+  bulletBodies.forEach((body, i) => {
+    const pos = plankPositionToPixi(body.getPosition());
+    bulletSprites[i].position.set(pos.x, pos.y);
     if (pos.x < 0 || pos.x > 1920) {
       //console.log(bulletBodies[i]);
-      world.destroyBody(bulletBodies[i]);
+      world.destroyBody(body);
       bulletBodies.splice(i, 1);
-      bulletSprites.splice(i, 1);
-      app.stage.removeChild(sprite);
-      console.log();
+      console.log(bulletSprites, bulletBodies);
+      app.stage.removeChild(bulletSprites[bulletSprites.length - 1]);
+      bulletSprites.pop();
     }
   });
 
