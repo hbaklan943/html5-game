@@ -10,6 +10,7 @@ const KeyboardHelper = {
   d: 68,
   a: 65,
   s: 83,
+  p: 80,
 };
 let rightPressed = false;
 let leftPressed = false;
@@ -23,8 +24,10 @@ let wHolding = false;
 let dPressed = false;
 let aPressed = false;
 let sPressed = false;
+let pPressed = false;
+let pHolding = false;
 function keyDownHandler(event) {
-  console.log(event.keyCode);
+  console.log(world.getBodyList());
   if (event.keyCode === KeyboardHelper.space) {
     spacePressed = true;
   }
@@ -54,11 +57,18 @@ function keyDownHandler(event) {
     sPressed = true;
     character2Body.setAwake(true);
   }
+  if (event.keyCode === KeyboardHelper.p) {
+    pPressed = true;
+  }
 }
 function keyUpHandler(event) {
   if (event.keyCode === KeyboardHelper.space) {
     spacePressed = false;
     spaceHolding = false;
+  }
+  if (event.keyCode === KeyboardHelper.p) {
+    pPressed = false;
+    pHolding = false;
   }
   if (event.keyCode === KeyboardHelper.right) {
     rightPressed = false;
@@ -129,7 +139,7 @@ let character1Body = world.createBody({
   fixedRotation: true,
   position: planck.Vec2(11, 15.0),
   userData: {
-    id: 1,
+    characterId: 1,
     direction: true,
   },
 });
@@ -138,7 +148,7 @@ let character2Body = world.createBody({
   fixedRotation: true,
   position: planck.Vec2(19, 15.0),
   userData: {
-    id: 2,
+    characterId: 2,
     direction: true,
   },
 });
@@ -177,20 +187,23 @@ world.on("pre-solve", function (contact, oldManifold) {
     contactingPlatform = fixB;
     contactingCharacter = fixA;
   }
-  if (fixA.m_body.m_type == "bullet") {
+  if (fixA.getBody().getType() == "bullet") {
     if (
-      fixA.getBody().getUserData().shooter === fixB.getBody().getUserData().id
+      fixA.getBody().getUserData().shooterId ===
+      fixB.getBody().getUserData().characterId
     ) {
+      contact.setEnabled(false);
       return;
     }
     isCharBulletContact = true;
     let vel = fixB.getBody().getLinearVelocity();
     vel.x =
-      vel.x + fixA.getBody().getUserData().direction ? vel.x + 5 : vel.x - 5;
+      vel.x + fixA.getBody().getLinearVelocity().x > 0 ? vel.x + 5 : vel.x - 5;
     fixB.getBody().setLinearVelocity(vel);
   } else if (fixB.getBody().getType() == "bullet") {
     if (
-      fixB.getBody().getUserData().shooter === fixA.getBody().getUserData().id
+      fixB.getBody().getUserData().shooterId ===
+      fixA.getBody().getUserData().characterId
     ) {
       contact.setEnabled(false);
       return;
@@ -199,10 +212,9 @@ world.on("pre-solve", function (contact, oldManifold) {
     let vel = fixA.getBody().getLinearVelocity();
     vel.x = fixB.getBody().getLinearVelocity().x > 0 ? vel.x + 5 : vel.x - 5;
     fixA.getBody().setLinearVelocity(vel);
-    console.log("force applied");
-    console.log(world.getBodyCount());
+    //console.log(world.getBodyCount());
     world.destroyBody(fixB.getBody());
-    console.log(world.getBodyCount());
+    //console.log(world.getBodyCount());
   }
   if (!isCharPlatformContact) {
     contact.setEnabled(false);
@@ -215,10 +227,16 @@ world.on("pre-solve", function (contact, oldManifold) {
   ) {
     contact.setEnabled(false);
   }
-  if (contactingCharacter.getBody().getUserData().id == 1 && downPressed) {
+  if (
+    contactingCharacter.getBody().getUserData().characterId == 1 &&
+    downPressed
+  ) {
     contact.setEnabled(false);
   }
-  if (contactingCharacter.getBody().getUserData().id == 2 && sPressed) {
+  if (
+    contactingCharacter.getBody().getUserData().characterId == 2 &&
+    sPressed
+  ) {
     contact.setEnabled(false);
   }
 });
@@ -264,13 +282,33 @@ function gameLoop(delta) {
     //console.log("applied impulse");
     wHolding = true;
   }
+  if (pPressed && !pHolding) {
+    let bulletBody = world.createBody({
+      position: character1Body.getPosition(),
+      type: "bullet",
+      userData: {
+        direction: character1UserData.direction,
+        shooterId: 1,
+      },
+    });
+    bulletBody.createFixture(planck.Box(0.18, 0.046));
+    bulletBody.setLinearVelocity(
+      planck.Vec2(character1UserData.direction ? 25 : -25, 0)
+    );
+    bulletBodies.push(bulletBody);
+    let bulletSprite = new PIXI.Sprite(bulletTexture);
+    bulletSprite.anchor.set(0.5);
+    app.stage.addChild(bulletSprite);
+    bulletSprites.push(bulletSprite);
+    pHolding = true;
+  }
   if (spacePressed && !spaceHolding) {
     let bulletBody = world.createBody({
       position: character2Body.getPosition(),
       type: "bullet",
       userData: {
         direction: character2UserData.direction,
-        shooter: 2,
+        shooterId: 2,
       },
     });
     bulletBody.createFixture(planck.Box(0.18, 0.046));
