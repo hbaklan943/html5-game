@@ -164,8 +164,10 @@ world.on("pre-solve", function (contact, oldManifold) {
   let fixB = contact.getFixtureB();
 
   let isCharPlatformContact;
+  let isCharBulletContact;
   let contactingPlatform;
   let contactingCharacter;
+  let contactingBullet;
   if (fixA.m_body.m_type == "static") {
     isCharPlatformContact = true;
     contactingPlatform = fixA;
@@ -174,6 +176,33 @@ world.on("pre-solve", function (contact, oldManifold) {
     isCharPlatformContact = true;
     contactingPlatform = fixB;
     contactingCharacter = fixA;
+  }
+  if (fixA.m_body.m_type == "bullet") {
+    if (
+      fixA.getBody().getUserData().shooter === fixB.getBody().getUserData().id
+    ) {
+      return;
+    }
+    isCharBulletContact = true;
+    let vel = fixB.getBody().getLinearVelocity();
+    vel.x =
+      vel.x + fixA.getBody().getUserData().direction ? vel.x + 5 : vel.x - 5;
+    fixB.getBody().setLinearVelocity(vel);
+  } else if (fixB.getBody().getType() == "bullet") {
+    if (
+      fixB.getBody().getUserData().shooter === fixA.getBody().getUserData().id
+    ) {
+      contact.setEnabled(false);
+      return;
+    }
+    isCharBulletContact = true;
+    let vel = fixA.getBody().getLinearVelocity();
+    vel.x = fixB.getBody().getLinearVelocity().x > 0 ? vel.x + 5 : vel.x - 5;
+    fixA.getBody().setLinearVelocity(vel);
+    console.log("force applied");
+    console.log(world.getBodyCount());
+    world.destroyBody(fixB.getBody());
+    console.log(world.getBodyCount());
   }
   if (!isCharPlatformContact) {
     contact.setEnabled(false);
@@ -239,14 +268,21 @@ function gameLoop(delta) {
     let bulletBody = world.createBody({
       position: character2Body.getPosition(),
       type: "bullet",
+      userData: {
+        direction: character2UserData.direction,
+        shooter: 2,
+      },
     });
     bulletBody.createFixture(planck.Box(0.18, 0.046));
-    bulletBody.setLinearVelocity(planck.Vec2(25, 0));
+    bulletBody.setLinearVelocity(
+      planck.Vec2(character2UserData.direction ? 25 : -25, 0)
+    );
     bulletBodies.push(bulletBody);
     let bulletSprite = new PIXI.Sprite(bulletTexture);
     bulletSprite.anchor.set(0.5);
     app.stage.addChild(bulletSprite);
     bulletSprites.push(bulletSprite);
+    //console.log(world.getBodyCount());
     spaceHolding = true;
   }
 
@@ -274,17 +310,17 @@ function gameLoop(delta) {
   character2Sprite.position.set(pixiCharacter2Pos.x, pixiCharacter2Pos.y);
   platform1Sprite.position.set(platform1Pos.x, platform1Pos.y);
   platform2Sprite.position.set(platform2Pos.x, platform2Pos.y);
-  console.log(bulletSprites, bulletBodies);
+  //console.log(bulletSprites, bulletBodies);
   bulletSprites.forEach((sprite, i) => {
     const pos = plankPositionToPixi(bulletBodies[i].getPosition());
-    //console.log(i, pos);
     sprite.position.set(pos.x, pos.y);
-  });
-  bulletSprites.forEach((sprite, i) => {
-    const pos = plankPositionToPixi(bulletBodies[i].getPosition());
     if (pos.x < 0 || pos.x > 1920) {
-      bulletBodies = bulletBodies.splice(i, 1);
-      bulletSprites = bulletSprites.splice(i, 1);
+      //console.log(bulletBodies[i]);
+      world.destroyBody(bulletBodies[i]);
+      bulletBodies.splice(i, 1);
+      bulletSprites.splice(i, 1);
+      app.stage.removeChild(sprite);
+      console.log();
     }
   });
 
