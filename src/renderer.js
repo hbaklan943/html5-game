@@ -137,19 +137,23 @@ let platform2Fix = platform2Body.createFixture(groundBox, 0.0);
 let character1Body = world.createBody({
   type: "dynamic",
   fixedRotation: true,
-  position: planck.Vec2(11, 15.0),
+  position: planck.Vec2(19, 15.0),
   userData: {
     characterId: 1,
     direction: true,
+    stamina: 2,
+    onGround: false,
   },
 });
 let character2Body = world.createBody({
   type: "dynamic",
   fixedRotation: true,
-  position: planck.Vec2(19, 15.0),
+  position: planck.Vec2(11, 15.0),
   userData: {
     characterId: 2,
     direction: true,
+    stamina: 2,
+    onGround: false,
   },
 });
 let dynamicBox = planck.Box(0.5, 0.5);
@@ -163,6 +167,7 @@ let character2Fix = character2Body.createFixture(fixtureDef);
 let bulletBodies = [];
 let bulletSprites = [];
 let destroyedBodies = [];
+let charactersOnPlatform = [];
 
 let timeStep = 1 / 60;
 let velocityIterations = 8;
@@ -179,11 +184,17 @@ world.on("pre-solve", function (contact, oldManifold) {
   let contactingPlatform;
   let contactingCharacter;
   let contactingBullet;
-  if (fixA.m_body.m_type == "static") {
+  if (
+    fixA.getBody().getType() == "static" &&
+    fixB.getBody().getType() == "dynamic"
+  ) {
     isCharPlatformContact = true;
     contactingPlatform = fixA;
     contactingCharacter = fixB;
-  } else if (fixB.m_body.m_type == "static") {
+  } else if (
+    fixB.getBody().getType() == "static" &&
+    fixA.getBody().getType() == "dynamic"
+  ) {
     isCharPlatformContact = true;
     contactingPlatform = fixB;
     contactingCharacter = fixA;
@@ -200,8 +211,8 @@ world.on("pre-solve", function (contact, oldManifold) {
     let vel = fixB.getBody().getLinearVelocity();
     vel.x =
       vel.x + fixA.getBody().getLinearVelocity().x > 0
-        ? vel.x + 10
-        : vel.x - 10;
+        ? vel.x + 15
+        : vel.x - 15;
     fixB.getBody().setLinearVelocity(vel);
     destroyedBodies.push(fixB.getBody());
   } else if (fixB.getBody().getType() == "bullet") {
@@ -214,7 +225,7 @@ world.on("pre-solve", function (contact, oldManifold) {
     }
     isCharBulletContact = true;
     let vel = fixA.getBody().getLinearVelocity();
-    vel.x = fixB.getBody().getLinearVelocity().x > 0 ? vel.x + 10 : vel.x - 10;
+    vel.x = fixB.getBody().getLinearVelocity().x > 0 ? vel.x + 15 : vel.x - 15;
     fixA.getBody().setLinearVelocity(vel);
     destroyedBodies.push(fixB.getBody());
   }
@@ -229,6 +240,27 @@ world.on("pre-solve", function (contact, oldManifold) {
   ) {
     contact.setEnabled(false);
   }
+  if (
+    contactingCharacter.getBody().getPosition().y.toFixed(1) ===
+      (contactingPlatform.getBody().getPosition().y + 1).toFixed(1) &&
+    contactingCharacter.getBody().getLinearVelocity().y === 0
+  ) {
+    if (!contactingCharacter.getBody().getUserData().onGround) {
+      contactingCharacter.getBody().setUserData({
+        ...contactingCharacter.getBody().getUserData(),
+        onGround: true,
+      });
+      charactersOnPlatform.push(contactingCharacter.getBody());
+      console.log("Stamina resetted");
+      console.log("---------------------");
+    }
+  } else {
+    contactingCharacter.getBody().setUserData({
+      ...contactingCharacter.getBody().getUserData(),
+      onGround: false,
+    });
+  }
+
   if (
     contactingCharacter.getBody().getUserData().characterId == 1 &&
     downPressed
@@ -248,7 +280,6 @@ function gameLoop(delta) {
   // Step the physics simulation
   stats.begin();
 
-  world.step(timeStep * delta, velocityIterations, positionIterations);
   //console.log(character1Body.getLinearVelocity());
   if (destroyedBodies.length !== 0) {
     destroyedBodies.forEach((body) => {
@@ -260,8 +291,15 @@ function gameLoop(delta) {
     });
     destroyedBodies.length = 0;
   }
+  if (charactersOnPlatform.length !== 0) {
+    charactersOnPlatform.forEach((characterBody) => {
+      characterBody.setUserData({ ...characterBody.getUserData(), stamina: 2 });
+    });
+    charactersOnPlatform.length = 0;
+  }
 
   let character1UserData = character1Body.getUserData();
+  //console.log(character1UserData);
   let character2UserData = character2Body.getUserData();
   if (rightPressed && character1Body.getLinearVelocity().x < 5) {
     character1Body.applyForce(planck.Vec2(70, 0), planck.Vec2(0, 0));
@@ -280,17 +318,26 @@ function gameLoop(delta) {
     character2Body.applyForce(planck.Vec2(-70, 0), planck.Vec2(0, 0));
     character2Body.setUserData({ ...character2UserData, direction: false });
   }
-  if (upPressed && !upHolding) {
+  if (upPressed && !upHolding && character1Body.getUserData().stamina > 0) {
     let vel = character1Body.getLinearVelocity();
     vel.y = 7;
     character1Body.setLinearVelocity(vel);
+    character1Body.setUserData({
+      ...character1Body.getUserData(),
+      stamina: character1Body.getUserData().stamina - 1,
+    });
+
     //console.log("applied impulse");
     upHolding = true;
   }
-  if (wPressed && !wHolding) {
+  if (wPressed && !wHolding && character2Body.getUserData().stamina > 0) {
     let vel = character2Body.getLinearVelocity();
     vel.y = 7;
     character2Body.setLinearVelocity(vel);
+    character2Body.setUserData({
+      ...character2Body.getUserData(),
+      stamina: character2Body.getUserData().stamina - 1,
+    });
     //console.log("applied impulse");
     wHolding = true;
   }
@@ -314,6 +361,7 @@ function gameLoop(delta) {
     bulletSprites.push(bulletSprite);
     pHolding = true;
   }
+
   if (spacePressed && !spaceHolding) {
     let bulletBody = world.createBody({
       position: character2Body.getPosition(),
@@ -360,7 +408,7 @@ function gameLoop(delta) {
   character2Sprite.position.set(pixiCharacter2Pos.x, pixiCharacter2Pos.y);
   platform1Sprite.position.set(platform1Pos.x, platform1Pos.y);
   platform2Sprite.position.set(platform2Pos.x, platform2Pos.y);
-  console.log(bulletSprites, bulletBodies);
+  //console.log(bulletSprites, bulletBodies);
   bulletBodies.forEach((body, i) => {
     const pos = plankPositionToPixi(body.getPosition());
     bulletSprites[i].position.set(pos.x, pos.y);
@@ -374,6 +422,7 @@ function gameLoop(delta) {
     }
   });
 
+  world.step(timeStep * delta, velocityIterations, positionIterations);
   // Render the PIXI.js stage
   app.render();
   stats.end();
