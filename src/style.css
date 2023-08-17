@@ -1,7 +1,23 @@
+:root {
+  font-family: "Lucida Console", "Courier New", monospace;
+}
+
 body {
   margin: 0;
 }
 
 canvas {
   vertical-align: bottom
+}
+
+.heading {
+  position: absolute;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+h1 {
+  color: bisque;
+  
 }

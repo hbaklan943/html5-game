@@ -105,35 +105,46 @@ let character1Sprite = PIXI.Sprite.from("./assets/red_character.png");
 let character2Sprite = PIXI.Sprite.from("./assets/blue_character.png");
 let platform1Sprite = PIXI.Sprite.from("./assets/ground.png");
 let platform2Sprite = PIXI.Sprite.from("./assets/ground.png");
+let platform3Sprite = PIXI.Sprite.from("./assets/ground.png");
 let bulletTexture = PIXI.Texture.from("./assets/bullet.png");
 character1Sprite.anchor.set(0.5);
 character2Sprite.anchor.set(0.5);
 platform1Sprite.anchor.set(0.5);
 platform2Sprite.anchor.set(0.5);
+platform3Sprite.anchor.set(0.5);
 app.stage.addChild(character1Sprite);
 app.stage.addChild(character2Sprite);
 app.stage.addChild(platform1Sprite);
 app.stage.addChild(platform2Sprite);
+app.stage.addChild(platform3Sprite);
 
 let gravity = planck.Vec2(0.0, -10.0);
 let world = planck.World({ gravity: gravity });
 let platform1Def = {
-  position: planck.Vec2(15.0, 8.0),
+  position: planck.Vec2(22.5, 10.5),
   userData: {
     id: 1,
   },
 };
 let platform2Def = {
-  position: planck.Vec2(15.0, 12.0),
+  position: planck.Vec2(7.5, 10.5),
+  userData: {
+    id: 2,
+  },
+};
+let platform3Def = {
+  position: planck.Vec2(15, 6.5),
   userData: {
     id: 2,
   },
 };
 let platform1Body = world.createBody(platform1Def);
 let platform2Body = world.createBody(platform2Def);
+let platform3Body = world.createBody(platform3Def);
 let groundBox = planck.Box(5.0, 0.5);
 let platform1Fix = platform1Body.createFixture(groundBox, 0.0);
 let platform2Fix = platform2Body.createFixture(groundBox, 0.0);
+let platform3Fix = platform3Body.createFixture(groundBox, 0.0);
 let character1Body = world.createBody({
   type: "dynamic",
   fixedRotation: true,
@@ -391,6 +402,7 @@ function gameLoop(delta) {
   let pixiCharacter2Pos = plankPositionToPixi(character2Position);
   let platform1Pos = plankPositionToPixi(platform1Body.getPosition());
   let platform2Pos = plankPositionToPixi(platform2Body.getPosition());
+  let platform3Pos = plankPositionToPixi(platform3Body.getPosition());
   /* console.log(
     "ground pos:",
     groundBody.getPosition(),
@@ -408,6 +420,8 @@ function gameLoop(delta) {
   character2Sprite.position.set(pixiCharacter2Pos.x, pixiCharacter2Pos.y);
   platform1Sprite.position.set(platform1Pos.x, platform1Pos.y);
   platform2Sprite.position.set(platform2Pos.x, platform2Pos.y);
+  platform2Sprite.position.set(platform2Pos.x, platform2Pos.y);
+  platform3Sprite.position.set(platform3Pos.x, platform3Pos.y);
   //console.log(bulletSprites, bulletBodies);
   bulletBodies.forEach((body, i) => {
     const pos = plankPositionToPixi(body.getPosition());
