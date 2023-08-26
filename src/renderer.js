@@ -383,7 +383,7 @@ function gameLoop(delta) {
         shooterId: 2,
       },
     });
-    bulletBody.createFixture(planck.Box(0.36, 0.092));
+    bulletBody.createFixture(planck.Box(0.5, 0.17));
     bulletBody.setLinearVelocity(
       planck.Vec2(character2UserData.direction ? 15 : -15, 0)
     );
@@ -446,6 +446,18 @@ function gameLoop(delta) {
     character2Body.setPosition(planck.Vec2(11, 15.0));
     character2Body.setLinearVelocity(planck.Vec2(0, 0));
     character2Body.setAwake(true);
+  }
+
+  // turn character sprites based on their direction
+  if (!character1UserData.direction) {
+    character1Sprite.transform.scale.set(-1, 1);
+  } else {
+    character1Sprite.transform.scale.set(1, 1);
+  }
+  if (!character2UserData.direction) {
+    character2Sprite.transform.scale.set(-1, 1);
+  } else {
+    character2Sprite.transform.scale.set(1, 1);
   }
 
   world.step(timeStep * delta, velocityIterations, positionIterations);
