@@ -427,7 +427,7 @@ function gameLoop(delta) {
   bulletBodies.forEach((body, i) => {
     const pos = plankPositionToPixi(body.getPosition());
     bulletSprites[i].position.set(pos.x, pos.y);
-    if (pos.x < 0 || pos.x > 1920) {
+    if (pos.x < -1920 || pos.x > 3840) {
       //console.log(bulletBodies[i]);
       world.destroyBody(body);
       bulletBodies.splice(i, 1);
@@ -453,17 +453,18 @@ function gameLoop(delta) {
   app.render();
   let character1Pos = character1Body.getPosition();
   let character2Pos = character2Body.getPosition();
-  let scaleFactor = 8 / 2 / (character1Pos.x - character2Pos.x) + 0.5;
+  let scaleFactor = 1 / 8 / (Math.abs(character1Pos.x - character2Pos.x) + 2);
   let pivotfactor = (15 - (character1Pos.x + character2Pos.x) / 2) * -64;
-  let positionfactorX = (15 - (character1Pos.x + character2Pos.x) / 2) * 64;
-  let positionfactorY = ((character1Pos.y + character2Pos.y) / 2 - 10) * 64;
-  console.log(15 - (character1Pos.x + character2Body.getPosition().x) / 2);
-  console.log(pivotfactor);
+  let pivotfactorX = ((character1Pos.x + character2Pos.x) / 2 - 15) * 64;
+  let pivotfactorY = (10 - (character1Pos.y + character2Pos.y) / 2) * 64;
+  //console.log(15 - (character1Pos.x + character2Body.getPosition().x) / 2);
+  //console.log(pivotfactor);
   //console.log(scaleFactor);
-  //app.stage.transform.scale.set(scaleFactor, scaleFactor);
   //app.stage.transform.pivot.set(pivotfactor, pivotfactor);
-  app.stage.transform.position.set(positionfactorX, positionfactorY);
-  console.log(app.stage.transform);
+  app.stage.pivot.set(pivotfactorX, pivotfactorY);
+  //app.stage.transform.scale.set(scaleFactor, scaleFactor);
+  console.log(scaleFactor);
+  console.log(app);
   stats.end();
 }
 
