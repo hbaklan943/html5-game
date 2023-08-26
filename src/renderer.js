@@ -453,18 +453,16 @@ function gameLoop(delta) {
   app.render();
   let character1Pos = character1Body.getPosition();
   let character2Pos = character2Body.getPosition();
-  let scaleFactor = 1 / 8 / (Math.abs(character1Pos.x - character2Pos.x) + 2);
-  let pivotfactor = (15 - (character1Pos.x + character2Pos.x) / 2) * -64;
-  let pivotfactorX = ((character1Pos.x + character2Pos.x) / 2 - 15) * 64;
-  let pivotfactorY = (10 - (character1Pos.y + character2Pos.y) / 2) * 64;
-  //console.log(15 - (character1Pos.x + character2Body.getPosition().x) / 2);
-  //console.log(pivotfactor);
-  //console.log(scaleFactor);
-  //app.stage.transform.pivot.set(pivotfactor, pivotfactor);
-  app.stage.pivot.set(pivotfactorX, pivotfactorY);
-  //app.stage.transform.scale.set(scaleFactor, scaleFactor);
+
+  // set stage pivot to collective center of characters location for scaling(zooming) to them
+  // set stage position to world center for camera to follow characters
+  let scaleFactor = (50 - Math.abs(character1Pos.x - character2Pos.x)) / 30; // adjust 2 numbers for desired magnification
+  let pivotX = ((character1Pos.x + character2Pos.x) / 2) * 64;
+  let pivotY = ((16.875 - character1Pos.y + 16.875 - character2Pos.y) / 2) * 64;
+  app.stage.transform.pivot.set(pivotX, pivotY);
+  app.stage.transform.position.set(960, 540);
+  app.stage.transform.scale.set(scaleFactor, scaleFactor);
   console.log(scaleFactor);
-  console.log(app);
   stats.end();
 }
 
