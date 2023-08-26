@@ -10,7 +10,7 @@ const KeyboardHelper = {
   d: 68,
   a: 65,
   s: 83,
-  p: 80,
+  shift: 16,
 };
 let rightPressed = false;
 let leftPressed = false;
@@ -24,10 +24,10 @@ let wHolding = false;
 let dPressed = false;
 let aPressed = false;
 let sPressed = false;
-let pPressed = false;
-let pHolding = false;
+let shiftPressed = false;
+let shiftHolding = false;
 function keyDownHandler(event) {
-  //console.log(world.getBodyList());
+  //console.log(event.keyCode);
   if (event.keyCode === KeyboardHelper.space) {
     spacePressed = true;
   }
@@ -57,8 +57,8 @@ function keyDownHandler(event) {
     sPressed = true;
     character2Body.setAwake(true);
   }
-  if (event.keyCode === KeyboardHelper.p) {
-    pPressed = true;
+  if (event.keyCode === KeyboardHelper.shift) {
+    shiftPressed = true;
   }
 }
 function keyUpHandler(event) {
@@ -66,9 +66,9 @@ function keyUpHandler(event) {
     spacePressed = false;
     spaceHolding = false;
   }
-  if (event.keyCode === KeyboardHelper.p) {
-    pPressed = false;
-    pHolding = false;
+  if (event.keyCode === KeyboardHelper.shift) {
+    shiftPressed = false;
+    shiftHolding = false;
   }
   if (event.keyCode === KeyboardHelper.right) {
     rightPressed = false;
@@ -141,6 +141,7 @@ let platform3Def = {
 let platform1Body = world.createBody(platform1Def);
 let platform2Body = world.createBody(platform2Def);
 let platform3Body = world.createBody(platform3Def);
+console.log(platform1Body);
 let groundBox = planck.Box(5.0, 0.5);
 let platform1Fix = platform1Body.createFixture(groundBox, 0.0);
 let platform2Fix = platform2Body.createFixture(groundBox, 0.0);
@@ -151,7 +152,7 @@ let character1Body = world.createBody({
   position: planck.Vec2(19, 15.0),
   userData: {
     characterId: 1,
-    direction: true,
+    direction: false,
     stamina: 2,
     onGround: false,
   },
@@ -352,7 +353,7 @@ function gameLoop(delta) {
     //console.log("applied impulse");
     wHolding = true;
   }
-  if (pPressed && !pHolding) {
+  if (shiftPressed && !shiftHolding) {
     let bulletBody = world.createBody({
       position: character1Body.getPosition(),
       type: "bullet",
@@ -370,7 +371,7 @@ function gameLoop(delta) {
     bulletSprite.anchor.set(0.5);
     app.stage.addChild(bulletSprite);
     bulletSprites.push(bulletSprite);
-    pHolding = true;
+    shiftHolding = true;
   }
 
   if (spacePressed && !spaceHolding) {
@@ -435,6 +436,17 @@ function gameLoop(delta) {
       bulletSprites.pop();
     }
   });
+  if (
+    character1Body.getPosition().y < 0 ||
+    character2Body.getPosition().y < 0
+  ) {
+    character1Body.setPosition(planck.Vec2(19, 15.0));
+    character1Body.setLinearVelocity(planck.Vec2(0, 0));
+    character1Body.setAwake(true);
+    character2Body.setPosition(planck.Vec2(11, 15.0));
+    character2Body.setLinearVelocity(planck.Vec2(0, 0));
+    character2Body.setAwake(true);
+  }
 
   world.step(timeStep * delta, velocityIterations, positionIterations);
   // Render the PIXI.js stage
