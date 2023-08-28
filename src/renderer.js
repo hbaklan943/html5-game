@@ -97,6 +97,37 @@ function keyUpHandler(event) {
     sPressed = false;
   }
 }
+let restartButton = document.getElementById("restart-button");
+let maxHealth = 2;
+document.getElementById("health-right").textContent = `${maxHealth}❤`;
+document.getElementById("health-left").textContent = `${maxHealth}❤`;
+restartButton.onclick = () => {
+  character1Body.setPosition(planck.Vec2(19, 15.0));
+  character1Body.setLinearVelocity(planck.Vec2(0, 0));
+  character1Body.setAwake(true);
+  character1Body.setUserData({
+    ...character1Body.getUserData(),
+    direction: false,
+    stamina: 2,
+    onGround: false,
+    health: 2,
+  });
+  document.getElementById("health-right").textContent = `${maxHealth}❤`;
+  character2Body.setPosition(planck.Vec2(11, 15.0));
+  character2Body.setLinearVelocity(planck.Vec2(0, 0));
+  character2Body.setAwake(true);
+  character2Body.setUserData({
+    ...character2Body.getUserData(),
+    direction: true,
+    stamina: 2,
+    onGround: false,
+    health: 2,
+  });
+
+  document.getElementById("health-left").textContent = `${maxHealth}❤`;
+  document.getElementById("victory-div").style.display = "none";
+  app.start();
+};
 
 let app = new PIXI.Application({ width: 1920, height: 1080 });
 document.body.appendChild(app.view);
@@ -155,6 +186,7 @@ let character1Body = world.createBody({
     direction: false,
     stamina: 2,
     onGround: false,
+    health: 2,
   },
 });
 let character2Body = world.createBody({
@@ -166,6 +198,7 @@ let character2Body = world.createBody({
     direction: true,
     stamina: 2,
     onGround: false,
+    health: 2,
   },
 });
 let dynamicBox = planck.Box(0.5, 0.5);
@@ -247,7 +280,7 @@ world.on("pre-solve", function (contact, oldManifold) {
   }
 
   if (
-    contactingCharacter.getBody().getPosition().y <=
+    contactingCharacter.getBody().getPosition().y <
     contactingPlatform.getBody().getPosition().y + 1
   ) {
     contact.setEnabled(false);
@@ -309,10 +342,10 @@ function gameLoop(delta) {
     });
     charactersOnPlatform.length = 0;
   }
-
+  // userdatas for each game loop
   let character1UserData = character1Body.getUserData();
-  //console.log(character1UserData);
   let character2UserData = character2Body.getUserData();
+
   if (rightPressed && character1Body.getLinearVelocity().x < 5) {
     character1Body.applyForce(planck.Vec2(70, 0), planck.Vec2(0, 0));
     character1Body.setUserData({ ...character1UserData, direction: true });
@@ -436,28 +469,57 @@ function gameLoop(delta) {
       bulletSprites.pop();
     }
   });
-  if (
-    character1Body.getPosition().y < 0 ||
-    character2Body.getPosition().y < 0
-  ) {
+
+  //reset position when dies, change health
+  if (character1Body.getPosition().y < 0) {
     character1Body.setPosition(planck.Vec2(19, 15.0));
     character1Body.setLinearVelocity(planck.Vec2(0, 0));
     character1Body.setAwake(true);
+    character1Body.setUserData({
+      ...character1Body.getUserData(),
+      health: character1UserData.health - 1,
+    });
+    document.getElementById("health-right").textContent = `${
+      character1Body.getUserData().health
+    }❤`;
+    if (character1Body.getUserData().health == 0) {
+      app.stop();
+      document.getElementById("victory-p").textContent = "Mavi Aldi Eli Helal!";
+      document.getElementById("victory-div").style.display = "flex";
+    }
+  }
+  if (character2Body.getPosition().y < 0) {
     character2Body.setPosition(planck.Vec2(11, 15.0));
     character2Body.setLinearVelocity(planck.Vec2(0, 0));
     character2Body.setAwake(true);
+    character2Body.setUserData({
+      ...character2Body.getUserData(),
+      health: character2UserData.health - 1,
+    });
+    document.getElementById("health-left").textContent = `${
+      character2Body.getUserData().health
+    }❤`;
+    if (character2Body.getUserData().health == 0) {
+      app.stop();
+      document.getElementById("victory-p").textContent =
+        "Kirmizi Aldi Eli Helal!";
+
+      document.getElementById("victory-div").style.display = "flex";
+    }
   }
 
   // turn character sprites based on their direction
+  // and scale them down from 64*3 pixels size to 64px size
+  // made character sprites 64*3 pixels to not look bad when viewport zooms
   if (!character1UserData.direction) {
-    character1Sprite.transform.scale.set(-1, 1);
+    character1Sprite.transform.scale.set(-1 / 3, 1 / 3);
   } else {
-    character1Sprite.transform.scale.set(1, 1);
+    character1Sprite.transform.scale.set(1 / 3, 1 / 3);
   }
   if (!character2UserData.direction) {
-    character2Sprite.transform.scale.set(-1, 1);
+    character2Sprite.transform.scale.set(-1 / 3, 1 / 3);
   } else {
-    character2Sprite.transform.scale.set(1, 1);
+    character2Sprite.transform.scale.set(1 / 3, 1 / 3);
   }
 
   world.step(timeStep * delta, velocityIterations, positionIterations);
@@ -474,7 +536,7 @@ function gameLoop(delta) {
   app.stage.transform.pivot.set(pivotX, pivotY);
   app.stage.transform.position.set(960, 540);
   app.stage.transform.scale.set(scaleFactor, scaleFactor);
-  console.log(scaleFactor);
+  //console.log(scaleFactor);
   stats.end();
 }
 
