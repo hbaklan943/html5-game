@@ -98,7 +98,7 @@ function keyUpHandler(event) {
   }
 }
 let restartButton = document.getElementById("restart-button");
-let maxHealth = 2;
+let maxHealth = 7;
 document.getElementById("health-right").textContent = `${maxHealth}❤`;
 document.getElementById("health-left").textContent = `${maxHealth}❤`;
 restartButton.onclick = () => {
@@ -110,7 +110,7 @@ restartButton.onclick = () => {
     direction: false,
     stamina: 2,
     onGround: false,
-    health: 2,
+    health: maxHealth,
   });
   document.getElementById("health-right").textContent = `${maxHealth}❤`;
   character2Body.setPosition(planck.Vec2(11, 15.0));
@@ -186,7 +186,7 @@ let character1Body = world.createBody({
     direction: false,
     stamina: 2,
     onGround: false,
-    health: 2,
+    health: maxHealth,
   },
 });
 let character2Body = world.createBody({
@@ -198,7 +198,7 @@ let character2Body = world.createBody({
     direction: true,
     stamina: 2,
     onGround: false,
-    health: 2,
+    health: maxHealth,
   },
 });
 let dynamicBox = planck.Box(0.5, 0.5);
@@ -404,7 +404,7 @@ function gameLoop(delta) {
     bulletSprite.anchor.set(0.5);
     app.stage.addChild(bulletSprite);
     bulletSprites.push(bulletSprite);
-    shiftHolding = true;
+    //shiftHolding = true;
   }
 
   if (spacePressed && !spaceHolding) {
@@ -471,7 +471,11 @@ function gameLoop(delta) {
   });
 
   //reset position when dies, change health
-  if (character1Body.getPosition().y < 0) {
+  if (
+    character1Body.getPosition().y < 0 ||
+    character1Body.getPosition().x < -15 ||
+    character1Body.getPosition().x > 45
+  ) {
     character1Body.setPosition(planck.Vec2(19, 15.0));
     character1Body.setLinearVelocity(planck.Vec2(0, 0));
     character1Body.setAwake(true);
@@ -488,7 +492,11 @@ function gameLoop(delta) {
       document.getElementById("victory-div").style.display = "flex";
     }
   }
-  if (character2Body.getPosition().y < 0) {
+  if (
+    character2Body.getPosition().y < 0 ||
+    character2Body.getPosition().x < -10 ||
+    character2Body.getPosition().x > 40
+  ) {
     character2Body.setPosition(planck.Vec2(11, 15.0));
     character2Body.setLinearVelocity(planck.Vec2(0, 0));
     character2Body.setAwake(true);
@@ -535,7 +543,10 @@ function gameLoop(delta) {
   let pivotY = ((16.875 - character1Pos.y + 16.875 - character2Pos.y) / 2) * 64;
   app.stage.transform.pivot.set(pivotX, pivotY);
   app.stage.transform.position.set(960, 540);
-  app.stage.transform.scale.set(scaleFactor, scaleFactor);
+  app.stage.transform.scale.set(
+    scaleFactor < 0.75 ? 0.75 : scaleFactor,
+    scaleFactor < 0.75 ? 0.75 : scaleFactor
+  );
   //console.log(scaleFactor);
   stats.end();
 }
